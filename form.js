@@ -1,32 +1,23 @@
-// Stop AJAX caching 
-$.ajaxSetup({ cache:false });
+// 1. When someone submits the form ($ is a shortcut for jQuery):
+jQuery("form").submit(function() {
+    // 2. Perform an AJAX request:
+    $.ajax({
+        // 3. Where to send data: use the URL from the form's action attribute
+        url: $('form').attr('action'),
+        // 4. What data to send: send the username specified in form input
+        data: { username: $('input').val() },
+        // 5. What to do if data submits successfully:
+        success: function(result){
+            // 6. Change the paragraph with an id 'message' to display a welcome message
+            $('p#message').html('Hello there ' + result.username + '! Number of checkins: ' + result.checkIns);
+            // 7. Hide the form now the user has checked in
+            $('form').hide();
+            // 8. Once they have checked in, stop watching their position
+            if (typeof watchUser != 'undefined')
+                navigator.geolocation.clearWatch(watchUser);
+        } // END success
+    }); // END ajax
 
-// Wait for the page to load
-$(document).ready(interceptSubmit);
-
-// Main function: process form input via AJAX
-function interceptSubmit() {
-    // 1 When someone clicks on the button...
-    $("form").submit(function() {
-
-        var username = $('input:first').val();
-           $.ajax({
-                url: 'http://form.decoded.co:3000/',
-                data: {username: username},
-                method: 'POST',
-                dataType: 'jsonp',
-                jsonp: 'callback',
-                jsonpCallback: 'jsonpCallback',
-                success: function(data){
-                    console.log(data);
-                    // Display messages
-                    $('p#message').html('Hello there @' + data.username + '! Number of checkins: ' + data.checkIns);   
-                    $('form').hide();
-                    if (typeof watchUser != 'undefined') navigator.geolocation.clearWatch(watchUser);
-                }
-            });
-        return false;
-    })
-    // Allow form to submit without reloading the page 
-}
-  
+    // 9. Allow form to submit without reloading the page
+    event.preventDefault();
+}) // END submit
